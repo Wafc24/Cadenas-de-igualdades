@@ -1,0 +1,17 @@
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores y Entornos de Desarrollo
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.antigravity/
+
+# Temporales y respaldos
+*.tmp
+*.bak
+*.log
