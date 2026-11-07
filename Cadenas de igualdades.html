@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Tren de las Igualdades Mágicas</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --secondary: #06B6D4;
+      --accent: #F59E0B;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg: #EEF2FF;
+      --card-bg: #FFFFFF;
+      --text: #1F2937;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif, system-ui;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .game-container {
+      background: var(--card-bg);
+      border-radius: 28px;
+      box-shadow: 0 16px 32px rgba(79, 70, 229, 0.15);
+      width: 100%;
+      max-width: 720px;
+      padding: 28px;
+      border: 5px solid #C7D2FE;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 3px dashed #E0E7FF;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      background: #E0E7FF;
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 1.15rem;
+    }
+
+    .score-badge {
+      background: #FEF3C7;
+      color: #B45309;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 1.15rem;
+    }
+
+    /* Pantallas */
+    .screen {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: var(--primary);
+      font-size: 2.3rem;
+      margin-bottom: 12px;
+    }
+
+    p.subtitle {
+      font-size: 1.25rem;
+      color: #4B5563;
+      margin-bottom: 24px;
+    }
+
+    /* Formulario de Inicio */
+    .input-group {
+      margin: 20px 0;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 380px;
+      padding: 14px 20px;
+      border: 3px solid #CBD5E1;
+      border-radius: 16px;
+      font-size: 1.25rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .level-select {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .level-btn {
+      padding: 12px 22px;
+      border: 3px solid transparent;
+      border-radius: 18px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .level-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .level-btn.selected {
+      border-color: #1E1B4B;
+      transform: scale(1.05);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+    .btn-basico { background: #BBF7D0; color: #166534; }
+    .btn-medio { background: #FED7AA; color: #9A3412; }
+    .btn-alto { background: #DDD6FE; color: #5B21B6; }
+
+    .btn-start {
+      margin-top: 26px;
+      padding: 16px 42px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 1.35rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-start:hover {
+      background: #4338CA;
+      transform: translateY(-2px);
+    }
+
+    /* Cadena de Igualdades (Vagones) */
+    .train-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .wagon {
+      background: #F8FAFC;
+      border: 3px solid #94A3B8;
+      border-radius: 20px;
+      padding: 16px 24px;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      min-width: 100px;
+    }
+
+    .wagon.middle {
+      background: #FEF3C7;
+      border-color: #F59E0B;
+      color: #B45309;
+    }
+
+    .wagon.mystery {
+      background: #EFF6FF;
+      border: 3px dashed #3B82F6;
+      color: #1D4ED8;
+    }
+
+    .equal-sign {
+      font-size: 2.6rem;
+      font-weight: bold;
+      color: #64748B;
+    }
+
+    .visual-dots {
+      margin: 10px 0 24px 0;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+    }
+
+    /* Opciones de Respuesta */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .option-btn {
+      background: white;
+      border: 3px solid #CBD5E1;
+      border-radius: 20px;
+      padding: 18px;
+      font-size: 1.7rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .option-btn:hover {
+      background: #F8FAFC;
+      border-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    .option-btn.correct {
+      background: #DCFCE7 !important;
+      border-color: var(--success) !important;
+      color: #166534 !important;
+    }
+
+    .option-btn.incorrect {
+      background: #FEE2E2 !important;
+      border-color: var(--danger) !important;
+      color: #991B1B !important;
+    }
+
+    /* Pantalla Final de Calificación */
+    .grade-card {
+      background: #F8FAFC;
+      border: 4px solid var(--primary);
+      border-radius: 24px;
+      padding: 26px;
+      margin: 20px 0;
+    }
+
+    .grade-number {
+      font-size: 4.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+      margin: 12px 0;
+    }
+
+    .grade-scale {
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      border-radius: 14px;
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    .desempeno-superior { background: #DCFCE7; color: #15803D; }
+    .desempeno-alto { background: #E0E7FF; color: #4338CA; }
+    .desempeno-basico { background: #FEF3C7; color: #B45309; }
+    .desempeno-bajo { background: #FEE2E2; color: #B91C1C; }
+
+    .print-btn {
+      background: #059669;
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 18px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media print {
+      body { background: white; }
+      .game-container { border: 2px solid #000; box-shadow: none; }
+      .print-btn, .btn-start { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <!-- Encabezado con estado -->
+    <header id="game-header" style="display: none;">
+      <div class="badge" id="student-tag">Estudiante: -</div>
+      <div class="badge" id="level-tag">Nivel: BÁSICO</div>
+      <div class="score-badge" id="score-tag">⭐ Puntos: 0</div>
+      <div class="badge" id="progress-tag">Pregunta: 1/5</div>
+    </header>
+
+    <!-- Pantalla 1: Bienvenida y Registro -->
+    <div class="screen active" id="screen-welcome">
+      <h1>🚂 El Tren de las Igualdades</h1>
+      <p class="subtitle">¡Descubre qué vagón falta en el tren!</p>
+
+      <div class="input-group">
+        <label for="student-name" style="display:block; font-size: 1.2rem; margin-bottom: 8px; font-weight: bold;">
+          Escribe tu nombre y apellido:
+        </label>
+        <input type="text" id="student-name" placeholder="Ej. Camila Gómez" autocomplete="off">
+      </div>
+
+      <div style="margin-top: 14px;">
+        <span style="font-size: 1.15rem; font-weight: bold; color: #374151;">Elige tu nivel de juego:</span>
+        <div class="level-select">
+          <button class="level-btn btn-basico selected" onclick="selectLevel('basico', this)">🌟 Básico (hasta 10)</button>
+          <button class="level-btn btn-medio" onclick="selectLevel('medio', this)">🚀 Medio (hasta 15)</button>
+          <button class="level-btn btn-alto" onclick="selectLevel('alto', this)">🏆 Alto (número secreto)</button>
+        </div>
+      </div>
+
+      <button class="btn-start" onclick="startGame()">¡Comenzar Tren! 🚆</button>
+    </div>
+
+    <!-- Pantalla 2: Pregunta Interactiva (Sin textos sobrecargados) -->
+    <div class="screen" id="screen-game">
+      <div class="train-container" id="train-display">
+        <!-- Render dinámico de los vagones -->
+      </div>
+
+      <div class="visual-dots" id="dots-display"></div>
+
+      <div class="options-grid" id="options-container">
+        <!-- Opciones de respuesta grandes -->
+      </div>
+    </div>
+
+    <!-- Pantalla 3: Calificación y Hoja de Resultados -->
+    <div class="screen" id="screen-results">
+      <h1>🎉 ¡Gran Trabajo en la Vía!</h1>
+      <p class="subtitle">Completaste tu recorrido de igualdades.</p>
+
+      <div class="grade-card">
+        <h2 id="result-student-name" style="color: #334155; margin-bottom: 6px;">Estudiante</h2>
+        <p id="result-meta" style="color: #64748B; font-size: 1.1rem;">Grado 1° • Matemáticas</p>
+        
+        <div class="grade-number" id="result-grade">5.0</div>
+        <div class="grade-scale" id="result-scale">Desempeño Superior</div>
+        
+        <div style="margin-top: 16px; font-size: 1.25rem; color: #1E293B;">
+          <p>Preguntas correctas: <strong id="correct-count">5</strong> de 5</p>
+          <p>Puntaje acumulado: <strong id="final-points">100</strong> puntos ⭐</p>
+        </div>
+      </div>
+
+      <button class="print-btn" onclick="window.print()">🖨️ Guardar o Imprimir Nota</button>
+      <br>
+      <button class="btn-start" style="margin-top: 14px; background: #64748B;" onclick="restartGame()">🔄 Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    let currentStudent = "";
+    let currentLevel = "basico";
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let correctAnswersCount = 0;
+    const totalQuestions = 5;
+
+    // Reactivos visuales sin textos excesivos
+    const questionsBank = {
+      basico: [
+        {
+          w1: "2 + 3",
+          w2: "5",
+          w3: "?",
+          correct: "1 + 4",
+          options: ["1 + 4", "2 + 2", "5 + 3", "1 + 1"],
+          dots: "🍎🍎 + 🍎🍎🍎 = 5 manzanas"
+        },
+        {
+          w1: "4 + 2",
+          w2: "6",
+          w3: "?",
+          correct: "3 + 3",
+          options: ["3 + 3", "4 + 4", "2 + 1", "5 + 5"],
+          dots: "⭐ ⭐ ⭐ ⭐ + ⭐ ⭐ = 6 estrellas"
+        },
+        {
+          w1: "1 + 6",
+          w2: "7",
+          w3: "?",
+          correct: "5 + 2",
+          options: ["5 + 2", "3 + 1", "4 + 1", "6 + 6"],
+          dots: "🚗 + 🚗🚗🚗🚗🚗🚗 = 7 carritos"
+        },
+        {
+          w1: "5 + 3",
+          w2: "8",
+          w3: "?",
+          correct: "4 + 4",
+          options: ["4 + 4", "2 + 3", "6 + 1", "3 + 2"],
+          dots: "🎈🎈🎈🎈🎈 + 🎈🎈🎈 = 8 globos"
+        },
+        {
+          w1: "6 + 3",
+          w2: "9",
+          w3: "?",
+          correct: "7 + 2",
+          options: ["7 + 2", "5 + 1", "3 + 3", "8 + 8"],
+          dots: "🍪🍪🍪🍪🍪🍪 + 🍪🍪🍪 = 9 galletas"
+        }
+      ],
+      medio: [
+        {
+          w1: "7 + 4",
+          w2: "11",
+          w3: "?",
+          correct: "8 + 3",
+          options: ["8 + 3", "9 + 5", "6 + 2", "5 + 4"],
+          dots: "🌸🌸🌸🌸🌸🌸🌸 + 🌸🌸🌸 = 11 flores"
+        },
+        {
+          w1: "9 + 3",
+          w2: "12",
+          w3: "?",
+          correct: "10 + 2",
+          options: ["10 + 2", "8 + 1", "5 + 5", "6 + 2"],
+          dots: "⚽⚽⚽⚽⚽⚽⚽⚽⚽ + ⚽⚽⚽ = 12 balones"
+        },
+        {
+          w1: "8 + 6",
+          w2: "14",
+          w3: "?",
+          correct: "10 + 4",
+          options: ["10 + 4", "9 + 1", "7 + 3", "8 + 2"],
+          dots: "✏️ (8) + ✏️ (6) = 14 lápices"
+        },
+        {
+          w1: "9 + 6",
+          w2: "15",
+          w3: "?",
+          correct: "8 + 7",
+          options: ["8 + 7", "6 + 4", "9 + 1", "5 + 5"],
+          dots: "🍬 (9) + 🍬 (6) = 15 dulces"
+        },
+        {
+          w1: "11 + 5",
+          w2: "16",
+          w3: "?",
+          correct: "9 + 7",
+          options: ["9 + 7", "8 + 2", "10 + 3", "7 + 5"],
+          dots: "🐟 (11) + 🐟 (5) = 16 peces"
+        }
+      ],
+      alto: [
+        {
+          w1: "5 + 3",
+          w2: "8",
+          w3: "2 + ?",
+          correct: "6",
+          options: ["6", "5", "4", "7"],
+          dots: "¿Cuánto le falta a 2 para llegar a 8? 🎯"
+        },
+        {
+          w1: "6 + 4",
+          w2: "10",
+          w3: "? + 3",
+          correct: "7",
+          options: ["7", "6", "8", "5"],
+          dots: "¿Qué número sumado con 3 da 10? 🎯"
+        },
+        {
+          w1: "7 + 5",
+          w2: "12",
+          w3: "4 + ?",
+          correct: "8",
+          options: ["8", "9", "6", "7"],
+          dots: "¿Cuánto le falta a 4 para llegar a 12? 🎯"
+        },
+        {
+          w1: "9 + 5",
+          w2: "14",
+          w3: "? + 6",
+          correct: "8",
+          options: ["8", "7", "10", "9"],
+          dots: "¿Qué número sumado con 6 da 14? 🎯"
+        },
+        {
+          w1: "8 + 7",
+          w2: "15",
+          w3: "10 + ?",
+          correct: "5",
+          options: ["5", "6", "4", "3"],
+          dots: "¿Cuánto le falta a 10 para llegar a 15? 🎯"
+        }
+      ]
+    };
+
+    function selectLevel(lvl, btn) {
+      currentLevel = lvl;
+      document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function startGame() {
+      const nameInput = document.getElementById('student-name').value.trim();
+      if (!nameInput) {
+        alert("Por favor escribe tu nombre antes de empezar.");
+        return;
+      }
+
+      currentStudent = nameInput;
+      currentQuestionIndex = 0;
+      score = 0;
+      correctAnswersCount = 0;
+
+      document.getElementById('screen-welcome').classList.remove('active');
+      document.getElementById('screen-game').classList.add('active');
+      document.getElementById('game-header').style.display = 'flex';
+
+      document.getElementById('student-tag').textContent = `Estudiante: ${currentStudent}`;
+      document.getElementById('level-tag').textContent = `Nivel: ${currentLevel.toUpperCase()}`;
+      
+      updateHeader();
+      renderQuestion();
+    }
+
+    function updateHeader() {
+      document.getElementById('score-tag').textContent = `⭐ Puntos: ${score}`;
+      document.getElementById('progress-tag').textContent = `Pregunta: ${currentQuestionIndex + 1}/${totalQuestions}`;
+    }
+
+    function renderQuestion() {
+      const q = questionsBank[currentLevel][currentQuestionIndex];
+      const train = document.getElementById('train-display');
+      const dots = document.getElementById('dots-display');
+      const optionsContainer = document.getElementById('options-container');
+
+      train.innerHTML = `
+        <div class="wagon">${q.w1}</div>
+        <div class="equal-sign">=</div>
+        <div class="wagon middle">${q.w2}</div>
+        <div class="equal-sign">=</div>
+        <div class="wagon mystery">${q.w3}</div>
+      `;
+
+      dots.textContent = q.dots;
+      optionsContainer.innerHTML = "";
+
+      // Mezclar opciones
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+      shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt, q.correct, btn);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct, buttonElement) {
+      const allButtons = document.querySelectorAll('.option-btn');
+      allButtons.forEach(btn => btn.disabled = true);
+
+      if (selected === correct) {
+        buttonElement.classList.add('correct');
+        score += 20;
+        correctAnswersCount++;
+      } else {
+        buttonElement.classList.add('incorrect');
+        allButtons.forEach(btn => {
+          if (btn.textContent === correct) btn.classList.add('correct');
+        });
+      }
+
+      updateHeader();
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+          renderQuestion();
+        } else {
+          showResults();
+        }
+      }, 1300);
+    }
+
+    function showResults() {
+      document.getElementById('screen-game').classList.remove('active');
+      document.getElementById('screen-results').classList.add('active');
+      document.getElementById('game-header').style.display = 'none';
+
+      document.getElementById('result-student-name').textContent = `Estudiante: ${currentStudent}`;
+      document.getElementById('result-meta').textContent = `Grado 1° • Prueba de Igualdades • Nivel ${currentLevel.toUpperCase()}`;
+      document.getElementById('correct-count').textContent = correctAnswersCount;
+      document.getElementById('final-points').textContent = score;
+
+      // Escala 1.0 a 5.0
+      let nota = 1.0 + (correctAnswersCount * 0.8);
+      nota = Math.round(nota * 10) / 10;
+      document.getElementById('result-grade').textContent = nota.toFixed(1);
+
+      const scaleElement = document.getElementById('result-scale');
+      scaleElement.className = "grade-scale";
+
+      if (nota >= 4.6) {
+        scaleElement.textContent = "Desempeño Superior 🏆";
+        scaleElement.classList.add('desempeno-superior');
+      } else if (nota >= 4.0) {
+        scaleElement.textContent = "Desempeño Alto 🌟";
+        scaleElement.classList.add('desempeno-alto');
+      } else if (nota >= 3.0) {
+        scaleElement.textContent = "Desempeño Básico 👍";
+        scaleElement.classList.add('desempeno-basico');
+      } else {
+        scaleElement.textContent = "Desempeño Bajo 💪";
+        scaleElement.classList.add('desempeno-bajo');
+      }
+    }
+
+    function restartGame() {
+      document.getElementById('screen-results').classList.remove('active');
+      document.getElementById('screen-welcome').classList.add('active');
+      document.getElementById('student-name').value = "";
+    }
+  </script>
+</body>
+</html>
